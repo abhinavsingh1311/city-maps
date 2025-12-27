@@ -1,18 +1,83 @@
-# React + Vite
+# City Roads
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application that visualizes city road networks using OpenStreetMap data. Search for any city and watch its streets draw progressively on screen with WebGL rendering.
 
-Currently, two official plugins are available:
+![City Roads Demo](./public/demo.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **City Search** — Enter any city name to fetch and render its road network
+- **Animated Drawing** — Roads render progressively for visual effect
+- **Interactive Controls** — Zoom and pan to explore the map
+- **Customization** — Adjust street color, background color, and line width
+- **Export** — Download your creation as PNG or SVG
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Tech Stack
 
-Note: This will impact Vite dev & build performances.
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![Three.js](https://img.shields.io/badge/Three.js-000000?logo=three.js&logoColor=white)
+![WebGL](https://img.shields.io/badge/WebGL-990000?logo=webgl&logoColor=white)
+![Overpass API](https://img.shields.io/badge/Overpass_API-7EBC6F?logo=openstreetmap&logoColor=white)
+![Nominatim API](https://img.shields.io/badge/Nominatim_API-7EBC6F?logo=openstreetmap&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- npm or yarn
+
+### Installation
+
+```bash
+git clone https://github.com/yourusername/city-roads.git
+cd city-roads
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser.
+
+## Usage
+
+1. Enter a city name in the search box
+2. Click **Search** or press Enter
+3. Watch the roads animate onto the screen
+4. Use mouse wheel to zoom, drag to pan
+5. Adjust colors and line width in the control panel
+6. Export as PNG or SVG
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── CitySearch.jsx      # Main component
+│   └── ControlPanel.jsx    # Settings panel
+├── hooks/
+│   └── useThreeScene.js    # Three.js setup & rendering
+├── utils/
+│   ├── nominatim.js        # Geocoding API
+│   ├── overpass.js         # Road data API
+│   └── projection.js       # Lat/lng to screen coords
+└── App.jsx
+```
+
+## APIs Used
+
+- [Nominatim](https://nominatim.openstreetmap.org/) — Geocoding (city name → bounding box)
+- [Overpass](https://overpass-api.de/) — OpenStreetMap road data
+
+## Acknowledgements
+
+Inspired by [anvaka/city-roads](https://anvaka.github.io/city-roads/)
+
+## License
+
+MIT
