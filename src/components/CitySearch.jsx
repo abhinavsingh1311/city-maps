@@ -2,14 +2,20 @@ import React, { useRef, useState } from "react";
 import LookUpCity from "../utils/nominatim";
 import GetRoads from "../utils/overpass";
 import useThreeScene from "../hooks/useThreeScene";
+import ControlPanel from "./ControlPanel";
 
 const CitySearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [projectedRoads, setProjectedRoads] = useState(null);
     const canvasRef = useRef(null);
     const [cityName, setCityName] = useState('');
+    const [settings, setSettings] = useState({
+        streetColor: '#1a1a1a',
+        bgColor: "transparent",
+        lineWidth: 2
+    });
 
-    useThreeScene(canvasRef, projectedRoads);
+    const { exportPNG, exportSVG } = useThreeScene(canvasRef, projectedRoads, settings, cityName);
 
     async function searchCity() {
         try {
@@ -72,7 +78,12 @@ const CitySearch = () => {
                     </button>
                 </div>
             </main>
+            {projectedRoads && (
 
+                <ControlPanel settings={settings} setSettings={setSettings} onExportSVG={exportSVG}
+                    onExportPNG={exportPNG} />
+
+            )}
             {isLoading && (
                 <div style={{
                     position: 'fixed',

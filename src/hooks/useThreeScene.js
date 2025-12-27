@@ -2,11 +2,69 @@ import * as THREE from 'three';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import fromLatLongToXY from '../utils/projection';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-export default function useThreeScene(canvasRef, roadData) {
+export default function useThreeScene(canvasRef, roadData, settings, cityName) {
+    const materialRef = useRef(null);
+    const sceneRef = useRef(null);
+    const rendererRef = useRef(null);
+    const cameraRef = useRef(null);
+    const positionsRef = useRef(null);
+
+    const exportPNG = useCallback(() => {
+        if (!rendererRef.current || !sceneRef.current || !cameraRef.current) { return; }
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+        const dataURl = rendererRef.current.domElement.toDataURL('/image/png');
+        const link = document.createElement('a');
+        link.download = `${cityName}.png`;
+        link.href = dataURl;
+        link.click();
+    }, [cityName]);
+
+    const exportSVG = useCallback(() => {
+        if (!positionsRef.current) return;
+        const positions = positionsRef.current;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        let paths = '';
+
+        for (let i = 0; i < positions.length; i += 6) {
+            const x1 = positions[i] + width / 2;
+            const y1 = height / 2 - positions[i + 1];
+            const x2 = positions[i + 3] + width / 2;
+            const y2 = height / 2 - positions[i + 4];
+            paths += `<line x1="${x1}" y1="${y2}" x2="${x2}" y2="${y2}" />`;
+        }
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+        <rect width="100%" height="100%" fill="${settings.bgColor === "transparent" ? 'none' : settings.bgColor}"/>
+        <g stroke="${settings.streetColor}" stroke-width="${settings.lineWidth}">
+        ${paths}
+        </g>
+        </svg>`;
+
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const link = document.createElement('a');
+        link.download = `${cityName}.svg`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+
+    }, [settings]);
+
+
+    useEffect(() => {
+        if (!materialRef.current || !sceneRef.current) {
+            return;
+        }
+        materialRef.current.color.set(settings.streetColor);
+        materialRef.current.linewidth = settings.lineWidth;
+        sceneRef.current.background = settings.bgColor === 'transparent' ?
+            null : new THREE.Color(settings.bgColor);
+
+    }, [settings]);
 
     useEffect(() => {
         if (!roadData?.elements?.length || !canvasRef.current) {
@@ -25,13 +83,16 @@ export default function useThreeScene(canvasRef, roadData) {
         );
         camera.zoom = 1;
         camera.updateProjectionMatrix();
+        cameraRef.current = camera;
 
         const scene = new THREE.Scene();
-        scene.background = null;
+        scene.background = settings.bgColor === 'transparent' ? null : new THREE.Color(settings.bgColor);
+        sceneRef.current = scene;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setClearColor(0x000000, 0);
         renderer.setSize(width, height);
+        rendererRef.current = renderer;
         canvasRef.current.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -49,7 +110,7 @@ export default function useThreeScene(canvasRef, roadData) {
             (sum, road) => sum + (road.canvasGeometry.length - 1) * 6, 0
         );
         const positions = new Float32Array(totalCoords);
-
+        positionsRef.current = positions;
         let index = 0;
         const halfWidth = width * 0.3;  // half of 60%
         const halfHeight = height * 0.3;
@@ -75,6 +136,8 @@ export default function useThreeScene(canvasRef, roadData) {
             resolution: new THREE.Vector2(width, height)
         });
 
+        materialRef.current = material;
+
         const line2 = new Line2(geometry, material);
         scene.add(line2);
 
@@ -85,14 +148,14 @@ export default function useThreeScene(canvasRef, roadData) {
         line2.geometry.instanceCount = 0;
 
         // Zoom handler
-        let zoom = 1;
-        const handleWheel = (e) => {
-            e.preventDefault();
-            zoom *= e.deltaY > 0 ? 0.9 : 1.1;
-            zoom = Math.max(0.3, Math.min(zoom, 10));
-            camera.zoom = zoom;
-            camera.updateProjectionMatrix();
-        };
+        // let zoom = 1;
+        // const handleWheel = (e) => {
+        //     e.preventDefault();
+        //     zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+        //     zoom = Math.max(0.3, Math.min(zoom, 10));
+        //     camera.zoom = zoom;
+        //     camera.updateProjectionMatrix();
+        // };
         // canvasRef.current.addEventListener('wheel', handleWheel, { passive: false });
 
         // Resize handler
@@ -126,11 +189,17 @@ export default function useThreeScene(canvasRef, roadData) {
             material.dispose();
             renderer.dispose();
             controls.dispose();
+            sceneRef.current = null;
+            material.current = null;
+            rendererRef.current = null;
             if (canvasRef.current) {
                 canvasRef.current.removeChild(renderer.domElement);
-                canvasRef.current.removeEventListener('wheel', handleWheel);
             }
         };
 
+
+
     }, [roadData]);
+
+    return { exportPNG, exportSVG };
 }
