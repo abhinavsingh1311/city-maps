@@ -34,15 +34,24 @@ function fromLatLongToXY(roadsData, canvasWidth, canvasHeight) {
     });
 
     // to canvas dimensions
+    const padding = 0.9;
+    // const scaleX = (canvasWidth * padding) / (maxX - minX);
+    // const scaleY = (canvasHeight * padding) / (maxY - minY);
+    // In projection.js, use uniform scale:
+    const scale = Math.min(
+        canvasWidth / (maxX - minX),
+        canvasHeight / (maxY - minY)
+    );
 
-    const scaleX = canvasWidth / (maxX - minX);
-    const scaleY = canvasHeight / (maxX - minY);
+    // Center the map
+    const offsetX = (canvasWidth - (maxX - minX) * scale) / 2;
+    const offsetY = (canvasHeight - (maxY - minY) * scale) / 2;
 
     return projectedRoads.map(road => ({
         ...road,
         canvasGeometry: road.projectedGeometry.map(point => ({
-            x: (point.x - minX) * scaleX,
-            y: (point.y - minY) * scaleY
+            x: (point.x - minX) * scale + offsetX,
+            y: (point.y - minY) * scale + offsetY
         }))
     }));
 }

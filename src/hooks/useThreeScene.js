@@ -3,57 +3,63 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { useEffect } from 'react';
+import fromLatLongToXY from '../utils/projection';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-export default function useThreeScene(canvasRef, projectedRoads) {
+export default function useThreeScene(canvasRef, roadData) {
 
     useEffect(() => {
-
-        const width = window.innerWidth, height = window.innerHeight;
-
-        if (!projectedRoads?.length || !canvasRef.current) {
+        if (!roadData?.elements?.length || !canvasRef.current) {
             console.log("data not supplied properly");
             return;
         }
 
-        //init
+        const width = window.innerWidth;
+        const height = window.innerHeight;
 
-        // orthographic camera
-        const left = -width / 2;
-        const right = width / 2;
-        const top = height / 2;
-        const bottom = -height / 2;
-        const near = -1;
-        const far = 1;
-        const camera = new THREE.OrthographicCamera(left, right, top, bottom, near, far);
+        // Orthographic camera
+        const camera = new THREE.OrthographicCamera(
+            -width / 2, width / 2,
+            height / 2, -height / 2,
+            -1, 1
+        );
         camera.zoom = 1;
-        camera.position.z = 1;
+        camera.updateProjectionMatrix();
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color('gray');
-        scene.backgroundBlurriness = 0.5;
+        scene.background = null;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setClearColor(0x000000, 0);
         renderer.setSize(width, height);
         canvasRef.current.appendChild(renderer.domElement);
 
-        //line geometry
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableRotate = false;
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.screenSpacePanning = true;
+
+
+        // Project roads to 60% of screen (centered)
+        const projectedRoads = fromLatLongToXY(roadData, width * 0.6, height * 0.6);
+
+        // Build positions array
         const totalCoords = projectedRoads.reduce(
             (sum, road) => sum + (road.canvasGeometry.length - 1) * 6, 0
         );
-
         const positions = new Float32Array(totalCoords);
 
         let index = 0;
-        const halfWidth = width / 2;
-        const halfHeight = height / 2;
+        const halfWidth = width * 0.3;  // half of 60%
+        const halfHeight = height * 0.3;
 
-        projectedRoads.forEach(roads => {
-            const points = roads.canvasGeometry;
+        projectedRoads.forEach(road => {
+            const points = road.canvasGeometry;
             for (let i = 0; i < points.length - 1; i++) {
                 positions[index++] = points[i].x - halfWidth;
                 positions[index++] = -(points[i].y - halfHeight);
                 positions[index++] = 0;
-                //second point 
                 positions[index++] = points[i + 1].x - halfWidth;
                 positions[index++] = -(points[i + 1].y - halfHeight);
                 positions[index++] = 0;
@@ -63,49 +69,68 @@ export default function useThreeScene(canvasRef, projectedRoads) {
         const geometry = new LineSegmentsGeometry();
         geometry.setPositions(positions);
 
-        //line material 
-
         const material = new LineMaterial({
-            color: 0X000000,
-            linewidth: 2, resolution: new THREE.Vector2(width, height)
+            color: '#1a1a1a',
+            linewidth: 2,
+            resolution: new THREE.Vector2(width, height)
         });
 
-
-        //line 2
-
         const line2 = new Line2(geometry, material);
-
         scene.add(line2);
 
-        const totalVertices = positions.length / 3;
+        // Animation
+        const totalSegments = positions.length / 6;
         let currentProgress = 0;
-        const drawSpeed = 1000;
+        const drawSpeed = 500;
+        line2.geometry.instanceCount = 0;
+
+        // Zoom handler
+        let zoom = 1;
+        const handleWheel = (e) => {
+            e.preventDefault();
+            zoom *= e.deltaY > 0 ? 0.9 : 1.1;
+            zoom = Math.max(0.3, Math.min(zoom, 10));
+            camera.zoom = zoom;
+            camera.updateProjectionMatrix();
+        };
+        // canvasRef.current.addEventListener('wheel', handleWheel, { passive: false });
+
+        // Resize handler
+        const handleResize = () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            renderer.setSize(w, h);
+            camera.left = -w / 2;
+            camera.right = w / 2;
+            camera.top = h / 2;
+            camera.bottom = -h / 2;
+            camera.updateProjectionMatrix();
+            material.resolution.set(w, h);
+        };
+        window.addEventListener('resize', handleResize);
 
         function animate() {
-            if (currentProgress < totalVertices) {
+            if (currentProgress < totalSegments) {
                 currentProgress += drawSpeed;
-
-                if (currentProgress > totalVertices) {
-                    currentProgress = totalVertices;
-                }
-                geometry.setDrawRange(0, currentProgress);
+                line2.geometry.instanceCount = Math.min(currentProgress, totalSegments);
             }
             renderer.render(scene, camera);
-
         }
 
         renderer.setAnimationLoop(animate);
+
         return () => {
             renderer.setAnimationLoop(null);
+            window.removeEventListener('resize', handleResize);
             geometry.dispose();
             material.dispose();
             renderer.dispose();
+            controls.dispose();
             if (canvasRef.current) {
                 canvasRef.current.removeChild(renderer.domElement);
+                canvasRef.current.removeEventListener('wheel', handleWheel);
             }
-        }
+        };
 
-    }, [projectedRoads]);
-
-};
-
+    }, [roadData]);
+}
