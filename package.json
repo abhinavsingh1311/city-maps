@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.13.2",
+    "mercator-projection": "^0.0.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "svg.js": "^2.7.1",
