@@ -7,6 +7,7 @@ const CitySearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [projectedRoads, setProjectedRoads] = useState(null);
     const canvasRef = useRef(null);
+    const [cityName, setCityName] = useState('');
 
     useThreeScene(canvasRef, projectedRoads);
 
@@ -14,7 +15,8 @@ const CitySearch = () => {
         try {
             setIsLoading(true);
             setProjectedRoads(null);
-            let city = document.getElementById("city").value;
+            const city = document.getElementById("city").value;
+            setCityName(city);
             var bboxquery = await LookUpCity(city);
             var roadData = await GetRoads(bboxquery);
             setProjectedRoads(roadData);
@@ -26,7 +28,51 @@ const CitySearch = () => {
     }
 
     return (
-        <main style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+        <>
+            {/* Canvas behind everything */}
+            <div
+                ref={canvasRef}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 0
+                }}
+            />
+
+            {/* UI in front */}
+            <main style={{ position: 'relative', zIndex: 10, padding: '2rem', pointerEvents: 'none' }}>
+                <h1 style={{ marginBottom: '1.5rem', pointerEvents: 'auto', color: 'ivory' }}>City Roads</h1>
+
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', pointerEvents: 'auto', justifyContent: 'center' }}>
+                    <input
+                        type="text"
+                        name="city"
+                        id="city"
+                        placeholder="Enter a city name"
+                        style={{
+                            flex: 1,
+                            maxWidth: '400px',
+                            padding: '0.75rem 1rem',
+                            fontSize: '1rem',
+                            border: '2px solid #ccc',
+                            borderRadius: '8px',
+                            outline: 'none'
+                        }}
+                    />
+                    <button
+                        type="submit"
+                        onClick={searchCity}
+                        disabled={isLoading}
+                        style={{ padding: '0.75rem 1.5rem' }}
+                    >
+                        {isLoading ? 'Loading' : 'Search'}
+                    </button>
+                </div>
+            </main>
+
             {isLoading && (
                 <div style={{
                     position: 'fixed',
@@ -40,51 +86,7 @@ const CitySearch = () => {
                     <p style={{ color: 'white', fontSize: '1.2rem' }}>Loading map data...</p>
                 </div>
             )}
-
-            <h1 style={{ marginBottom: '1.5rem', textAlign: "center" }}>City Roads</h1>
-
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <input
-                    type="text"
-                    name="city"
-                    id="city"
-                    placeholder="Enter a city name"
-                    style={{
-                        flex: 1,
-                        padding: '0.75rem 1rem',
-                        fontSize: '1rem',
-                        border: '2px solid #ccc',
-                        borderRadius: '8px',
-                        outline: 'none'
-                    }}
-                />
-                <button
-                    type="submit"
-                    onClick={searchCity}
-                    disabled={isLoading}
-                    style={{ padding: '0.75rem 1.5rem' }}
-                >
-                    {isLoading ? 'Loading' : 'Search'}
-                </button>
-            </div>
-
-            <div
-                ref={canvasRef}
-                style={{
-                    width: '100%',
-                    aspectRatio: '4 / 3',
-                    borderRadius: '8px',
-                    overflow: 'hidden',
-                    margin: '0 auto'
-                }}
-            />
-
-            {!projectedRoads && !isLoading && (
-                <p style={{ textAlign: 'center', color: '#666', marginTop: '1rem' }}>
-                    Search for a city to see its roads
-                </p>
-            )}
-        </main>
+        </>
     );
 };
 
