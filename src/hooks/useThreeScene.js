@@ -3,14 +3,15 @@ import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { useEffect } from 'react';
+import fromLatLongToXY from '../utils/projection';
 
-export default function useThreeScene(canvasRef, projectedRoads) {
+export default function useThreeScene(canvasRef, roadData) {
 
     useEffect(() => {
 
-        const width = window.innerWidth, height = window.innerHeight;
+        const width = canvasRef.current.clientWidth, height = canvasRef.current.clientHeight;
 
-        if (!projectedRoads?.length || !canvasRef.current) {
+        if (!roadData?.elements?.length || !canvasRef.current) {
             console.log("data not supplied properly");
             return;
         }
@@ -36,7 +37,9 @@ export default function useThreeScene(canvasRef, projectedRoads) {
         renderer.setSize(width, height);
         canvasRef.current.appendChild(renderer.domElement);
 
+
         //line geometry
+        const projectedRoads = fromLatLongToXY(roadData, width, height);
         const totalCoords = projectedRoads.reduce(
             (sum, road) => sum + (road.canvasGeometry.length - 1) * 6, 0
         );
@@ -63,6 +66,8 @@ export default function useThreeScene(canvasRef, projectedRoads) {
         const geometry = new LineSegmentsGeometry();
         geometry.setPositions(positions);
 
+        console.log("positions length:", positions.length);
+        console.log("first 12 values:", positions.slice(0, 12));
         //line material 
 
         const material = new LineMaterial({
@@ -74,24 +79,21 @@ export default function useThreeScene(canvasRef, projectedRoads) {
         //line 2
 
         const line2 = new Line2(geometry, material);
-
         scene.add(line2);
 
-        const totalVertices = positions.length / 3;
+        const totalSegments = positions.length / 6;
         let currentProgress = 0;
-        const drawSpeed = 1000;
+        const drawSpeed = 500;
+
+        // Start with nothing drawn
+        line2.geometry.instanceCount = 0;
 
         function animate() {
-            if (currentProgress < totalVertices) {
+            if (currentProgress < totalSegments) {
                 currentProgress += drawSpeed;
-
-                if (currentProgress > totalVertices) {
-                    currentProgress = totalVertices;
-                }
-                geometry.setDrawRange(0, currentProgress);
+                line2.geometry.instanceCount = Math.min(currentProgress, totalSegments);
             }
             renderer.render(scene, camera);
-
         }
 
         renderer.setAnimationLoop(animate);
@@ -105,7 +107,7 @@ export default function useThreeScene(canvasRef, projectedRoads) {
             }
         }
 
-    }, [projectedRoads]);
+    }, [roadData]);
 
 };
 

@@ -6,9 +6,9 @@ async function GetRoads(bboxQuery) {
         //south north west east
         const SNWE = `${bboxQuery[0]},${bboxQuery[2]},${bboxQuery[1]},${bboxQuery[3]}`;
         var query = `
-[out:json][timeout:1000];
+[out:json][timeout:10000];
 (
-way["highway"](${SNWE});
+  way["highway"~"motorway|trunk|primary|secondary|tertiary"](${SNWE});
 );
 out geom;`;
         console.log("Query being sent:", query);
