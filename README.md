@@ -36,7 +36,7 @@ A web application that visualizes city road networks using OpenStreetMap data. S
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/city-roads.git
+git clone https://github.com/abhinavsingh1311/city-roads.git
 cd city-roads
 npm install
 npm run dev
