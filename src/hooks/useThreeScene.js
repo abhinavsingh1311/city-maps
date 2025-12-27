@@ -36,7 +36,7 @@ export default function useThreeScene(canvasRef, roadData, settings, cityName) {
             const y1 = height / 2 - positions[i + 1];
             const x2 = positions[i + 3] + width / 2;
             const y2 = height / 2 - positions[i + 4];
-            paths += `<line x1="${x1}" y1="${y2}" x2="${x2}" y2="${y2}" />`;
+            paths += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
         }
 
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
@@ -52,7 +52,7 @@ export default function useThreeScene(canvasRef, roadData, settings, cityName) {
         link.href = URL.createObjectURL(blob);
         link.click();
 
-    }, [settings]);
+    }, [settings, cityName]);
 
 
     useEffect(() => {
@@ -71,6 +71,8 @@ export default function useThreeScene(canvasRef, roadData, settings, cityName) {
             console.log("data not supplied properly");
             return;
         }
+
+        const container = canvasRef.current;
 
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -93,7 +95,7 @@ export default function useThreeScene(canvasRef, roadData, settings, cityName) {
         renderer.setClearColor(0x000000, 0);
         renderer.setSize(width, height);
         rendererRef.current = renderer;
-        canvasRef.current.appendChild(renderer.domElement);
+        container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableRotate = false;
@@ -190,15 +192,15 @@ export default function useThreeScene(canvasRef, roadData, settings, cityName) {
             renderer.dispose();
             controls.dispose();
             sceneRef.current = null;
-            material.current = null;
+            materialRef.current = null;
             rendererRef.current = null;
-            if (canvasRef.current) {
-                canvasRef.current.removeChild(renderer.domElement);
+            if (container) {
+                container.removeChild(renderer.domElement);
             }
         };
 
 
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roadData]);
 
     return { exportPNG, exportSVG };

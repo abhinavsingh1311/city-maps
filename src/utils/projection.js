@@ -34,7 +34,7 @@ function fromLatLongToXY(roadsData, canvasWidth, canvasHeight) {
     });
 
     // to canvas dimensions
-    const padding = 0.9;
+    // const padding = 0.9;
     // const scaleX = (canvasWidth * padding) / (maxX - minX);
     // const scaleY = (canvasHeight * padding) / (maxY - minY);
     // In projection.js, use uniform scale:
