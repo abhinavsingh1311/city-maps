@@ -15,7 +15,7 @@ const CitySearch = () => {
         lineWidth: 2
     });
 
-    useThreeScene(canvasRef, projectedRoads, settings);
+    const { exportPNG, exportSVG } = useThreeScene(canvasRef, projectedRoads, settings, cityName);
 
     async function searchCity() {
         try {
@@ -80,7 +80,8 @@ const CitySearch = () => {
             </main>
             {projectedRoads && (
 
-                <ControlPanel settings={settings} setSettings={setSettings} />
+                <ControlPanel settings={settings} setSettings={setSettings} onExportSVG={exportSVG}
+                    onExportPNG={exportPNG} />
 
             )}
             {isLoading && (

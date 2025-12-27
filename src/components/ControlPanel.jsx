@@ -1,5 +1,5 @@
 
-export default function ControlPanel({ settings, setSettings }) {
+export default function ControlPanel({ settings, setSettings, onExportPNG, onExportSVG }) {
 
     const handleChange = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
@@ -80,8 +80,8 @@ export default function ControlPanel({ settings, setSettings }) {
                 />
             </div>
             <div style={{ display: "flex", gap: '0.5rem', alignItems: 'center', justifyContent: 'center' }}>
-                <button className="button">PNG</button>
-                <button className="button">SVG</button>
+                <button className="button" onClick={onExportPNG}>PNG</button>
+                <button className="button" onClick={onExportSVG}>SVG</button>
             </div>
         </div>
     )
