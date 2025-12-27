@@ -2,11 +2,25 @@ import * as THREE from 'three';
 import { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import fromLatLongToXY from '../utils/projection';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-export default function useThreeScene(canvasRef, roadData) {
+export default function useThreeScene(canvasRef, roadData, settings) {
+    const materialRef = useRef(null);
+    const sceneRef = useRef(null);
+    const rendererRef = useRef(null);
+
+    useEffect(() => {
+        if (!materialRef.current || !sceneRef.current) {
+            return;
+        }
+        materialRef.current.color.set(settings.streetColor);
+        materialRef.current.linewidth = settings.lineWidth;
+        sceneRef.current.background = settings.bgColor === 'transparent' ?
+            null : new THREE.Color(settings.bgColor);
+
+    }, [settings]);
 
     useEffect(() => {
         if (!roadData?.elements?.length || !canvasRef.current) {
@@ -27,11 +41,13 @@ export default function useThreeScene(canvasRef, roadData) {
         camera.updateProjectionMatrix();
 
         const scene = new THREE.Scene();
-        scene.background = null;
+        scene.background = settings.bgColor === 'transparent' ? null : new THREE.Color(settings.bgColor);
+        sceneRef.current = scene;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setClearColor(0x000000, 0);
         renderer.setSize(width, height);
+        rendererRef.current = renderer;
         canvasRef.current.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
@@ -74,6 +90,8 @@ export default function useThreeScene(canvasRef, roadData) {
             linewidth: 2,
             resolution: new THREE.Vector2(width, height)
         });
+
+        materialRef.current = material;
 
         const line2 = new Line2(geometry, material);
         scene.add(line2);
@@ -126,9 +144,11 @@ export default function useThreeScene(canvasRef, roadData) {
             material.dispose();
             renderer.dispose();
             controls.dispose();
+            sceneRef.current = null;
+            material.current = null;
+            rendererRef.current = null;
             if (canvasRef.current) {
                 canvasRef.current.removeChild(renderer.domElement);
-                canvasRef.current.removeEventListener('wheel', handleWheel);
             }
         };
 
