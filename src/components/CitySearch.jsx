@@ -97,45 +97,67 @@ const CitySearch = () => {
                             />
                         </>
                     ) : (
-                        <>
-                            <input
-                                type="text"
-                                name="city"
-                                id="city"
-                                placeholder="Enter a city name"
+                        <div className="heading">
+                            <a
+                                href="https://cityroads.space"
                                 style={{
-                                    flex: 1,
-                                    maxWidth: '300px',
-                                    padding: '0.75rem 1rem',
-                                    fontSize: '1rem',
-                                    border: '2px solid #ccc',
-                                    borderRadius: '8px',
-                                    outline: 'none'
+                                    color: '#704e4e',
+                                    fontFamily: 'Cursive',
+                                    fontSize: '2rem'
                                 }}
-                            />
-                            <button
-                                type="submit"
-                                onClick={searchCity}
-                                disabled={isLoading}
-                                style={{ padding: '0.75rem 1.5rem' }}
-                            >
-                                {isLoading ? 'Loading' : 'Search'}
-                            </button>
-                        </>
+                            >City Roads</a>
+                            <div className="flex-wrapper">
+                                <input
+                                    type="text"
+                                    name="city"
+                                    id="city"
+                                    placeholder="Enter a city name"
+                                    style={{
+                                        flex: 1,
+                                        maxWidth: '300px',
+                                        padding: '0.75rem 1rem',
+                                        fontSize: '1rem',
+                                        border: '2px solid #ccc',
+                                        borderRadius: '8px',
+                                        outline: 'none'
+                                    }}
+                                />
+                                <button
+                                    type="submit"
+                                    onClick={searchCity}
+                                    disabled={isLoading}
+                                    style={{ padding: '0.75rem 1.5rem' }}
+                                >
+                                    {isLoading ? 'Loading' : 'Search'}
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </div>
             </main>
 
-            {/* Title fixed at bottom right */}
-            <h1 style={{
+
+
+            {/* Footer - credits and attribution */}
+            <footer style={{
                 position: 'fixed',
                 bottom: '1rem',
+                left: '1rem',
                 right: '1rem',
-                margin: 0,
-                color: '#704e4e',
-                fontSize: '1.2rem',
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.5rem 1.5rem',
+                color: 'saddlebrown',
+                fontSize: '1rem',
                 zIndex: 10
-            }}>City Roads</h1>
+            }}>
+                <span>Inspired by <a href="https://anvaka.github.io/city-roads/">Anvaka</a></span>
+                <span>|</span>
+                <a href="https://github.com/abhinavsingh1311/city-maps">Source Code</a>
+
+            </footer>
 
             {isLoading && (
                 <div style={{
