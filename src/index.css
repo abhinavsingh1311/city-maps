@@ -6,7 +6,7 @@
   color-scheme: light dark;
   color: rgb(28, 27, 29);
   background-color: rgb(20, 35, 15);
-  background: linear-gradient(to bottom, darkslategray, ivory);
+  background: #f9f9f9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -58,6 +58,20 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.control-panel {
+  visibility: hidden;
+  opacity: 0;
+  max-height: 0;
+  transition: opacity 0.3s ease-out, max-height 0.3s ease-out, visibility 0.3s ease-out;
+  overflow: hidden;
+}
+
+.control-panel.active {
+  visibility: visible;
+  opacity: 1;
+  max-height: 50vh;
 }
 
 @media (prefers-color-scheme: light) {

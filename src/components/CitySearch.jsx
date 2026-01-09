@@ -7,6 +7,7 @@ import ControlPanel from "./ControlPanel";
 const CitySearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [projectedRoads, setProjectedRoads] = useState(null);
+    const [isOpen, setIsOpen] = useState(false);
     const canvasRef = useRef(null);
     const [cityName, setCityName] = useState('');
     const [settings, setSettings] = useState({
@@ -16,6 +17,10 @@ const CitySearch = () => {
     });
 
     const { exportPNG, exportSVG } = useThreeScene(canvasRef, projectedRoads, settings, cityName);
+
+    const togglePanel = () => {
+        setIsOpen(!isOpen);
+    }
 
     async function searchCity() {
         try {
@@ -50,7 +55,7 @@ const CitySearch = () => {
 
             {/* UI in front */}
             <main style={{ position: 'relative', zIndex: 10, padding: '2rem', pointerEvents: 'none' }}>
-                <h1 style={{ marginBottom: '1.5rem', pointerEvents: 'auto', color: 'ivory' }}>City Roads</h1>
+                <h1 style={{ marginBottom: '1.5rem', pointerEvents: 'auto', color: '#704e4e' }}>City Roads</h1>
 
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', pointerEvents: 'auto', justifyContent: 'center' }}>
                     <input
@@ -79,10 +84,14 @@ const CitySearch = () => {
                 </div>
             </main>
             {projectedRoads && (
-
-                <ControlPanel settings={settings} setSettings={setSettings} onExportSVG={exportSVG}
-                    onExportPNG={exportPNG} />
-
+                <ControlPanel
+                    settings={settings}
+                    setSettings={setSettings}
+                    onExportSVG={exportSVG}
+                    onExportPNG={exportPNG}
+                    isOpen={isOpen}
+                    onToggle={togglePanel}
+                />
             )}
             {isLoading && (
                 <div style={{

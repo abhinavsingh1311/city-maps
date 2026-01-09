@@ -1,5 +1,4 @@
-
-export default function ControlPanel({ settings, setSettings, onExportPNG, onExportSVG }) {
+export default function ControlPanel({ settings, setSettings, onExportPNG, onExportSVG, isOpen, onToggle }) {
 
     const handleChange = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }));
@@ -10,14 +9,20 @@ export default function ControlPanel({ settings, setSettings, onExportPNG, onExp
             position: 'fixed',
             top: '100px',
             right: '20px',
-            background: 'rgba(149, 150, 113, 0.95)',
-            padding: '1rem',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
-            zIndex: 10,
-            minWidth: '200px'
+            zIndex: 10
         }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Settings</h3>
+            <button onClick={onToggle} style={{ marginBottom: '0.5rem' }}>
+                {isOpen ? 'Close' : 'Control Panel'}
+            </button>
+
+            <div className={`control-panel ${isOpen ? 'active' : ''}`} style={{
+                background: 'rgba(149, 150, 113, 0.95)',
+                padding: '1rem',
+                borderRadius: '8px',
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
+                minWidth: '200px'
+            }}>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Settings</h3>
             <div style={{ marginBottom: '1rem' }}>
                 <label style={{
                     display: 'block',
@@ -82,6 +87,7 @@ export default function ControlPanel({ settings, setSettings, onExportPNG, onExp
             <div style={{ display: "flex", gap: '0.5rem', alignItems: 'center', justifyContent: 'center' }}>
                 <button className="button" onClick={onExportPNG}>PNG</button>
                 <button className="button" onClick={onExportSVG}>SVG</button>
+            </div>
             </div>
         </div>
     )
