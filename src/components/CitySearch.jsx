@@ -13,7 +13,7 @@ const CitySearch = () => {
     const [settings, setSettings] = useState({
         streetColor: '#1a1a1a',
         bgColor: "transparent",
-        lineWidth: 2
+        lineWidth: 0.5
     });
 
     const { exportPNG, exportSVG } = useThreeScene(canvasRef, projectedRoads, settings, cityName);
@@ -53,46 +53,90 @@ const CitySearch = () => {
                 }}
             />
 
-            {/* UI in front */}
-            <main style={{ position: 'relative', zIndex: 10, padding: '2rem', pointerEvents: 'none' }}>
-                <h1 style={{ marginBottom: '1.5rem', pointerEvents: 'auto', color: '#704e4e' }}>City Roads</h1>
+            {/* City name on top */}
+            {cityName && projectedRoads && (
+                <div style={{
+                    position: 'fixed',
+                    top: '1rem',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 10,
+                    color: '#704e4e',
+                    fontSize: '1.5rem',
+                    fontWeight: 'bold',
+                    textAlign: 'center'
+                }}>
+                    {cityName}
+                </div>
+            )}
 
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', pointerEvents: 'auto', justifyContent: 'center' }}>
-                    <input
-                        type="text"
-                        name="city"
-                        id="city"
-                        placeholder="Enter a city name"
-                        style={{
-                            flex: 1,
-                            maxWidth: '400px',
-                            padding: '0.75rem 1rem',
-                            fontSize: '1rem',
-                            border: '2px solid #ccc',
-                            borderRadius: '8px',
-                            outline: 'none'
-                        }}
-                    />
-                    <button
-                        type="submit"
-                        onClick={searchCity}
-                        disabled={isLoading}
-                        style={{ padding: '0.75rem 1.5rem' }}
-                    >
-                        {isLoading ? 'Loading' : 'Search'}
-                    </button>
+            {/* UI in front - Input and control panel toggle */}
+            <main style={{ position: 'fixed', top: '3rem', left: 0, right: 0, zIndex: 10, padding: '1rem', pointerEvents: 'none' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', pointerEvents: 'auto', justifyContent: 'center', alignItems: 'center' }}>
+                    {projectedRoads ? (
+                        <>
+                            <button
+                                onClick={() => window.location.reload()}
+                                style={{
+                                    padding: '0',
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    outline: 'none',
+                                    color: 'saddlebrown'
+                                }}
+                            >
+                                Search New
+                            </button>
+                            <ControlPanel
+                                settings={settings}
+                                setSettings={setSettings}
+                                onExportSVG={exportSVG}
+                                onExportPNG={exportPNG}
+                                isOpen={isOpen}
+                                onToggle={togglePanel}
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <input
+                                type="text"
+                                name="city"
+                                id="city"
+                                placeholder="Enter a city name"
+                                style={{
+                                    flex: 1,
+                                    maxWidth: '300px',
+                                    padding: '0.75rem 1rem',
+                                    fontSize: '1rem',
+                                    border: '2px solid #ccc',
+                                    borderRadius: '8px',
+                                    outline: 'none'
+                                }}
+                            />
+                            <button
+                                type="submit"
+                                onClick={searchCity}
+                                disabled={isLoading}
+                                style={{ padding: '0.75rem 1.5rem' }}
+                            >
+                                {isLoading ? 'Loading' : 'Search'}
+                            </button>
+                        </>
+                    )}
                 </div>
             </main>
-            {projectedRoads && (
-                <ControlPanel
-                    settings={settings}
-                    setSettings={setSettings}
-                    onExportSVG={exportSVG}
-                    onExportPNG={exportPNG}
-                    isOpen={isOpen}
-                    onToggle={togglePanel}
-                />
-            )}
+
+            {/* Title fixed at bottom right */}
+            <h1 style={{
+                position: 'fixed',
+                bottom: '1rem',
+                right: '1rem',
+                margin: 0,
+                color: '#704e4e',
+                fontSize: '1.2rem',
+                zIndex: 10
+            }}>City Roads</h1>
+
             {isLoading && (
                 <div style={{
                     position: 'fixed',
