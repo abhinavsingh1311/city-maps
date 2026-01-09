@@ -8,7 +8,7 @@ async function GetRoads(bboxQuery) {
         var query = `
 [out:json][timeout:10000];
 (
-  way["highway"~"motorway|trunk|primary|secondary|tertiary"](${SNWE});
+  way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|path|footway|cycleway)"](${SNWE});
 );
 out geom;`;
         console.log("Query being sent:", query);
